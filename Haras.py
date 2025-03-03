@@ -12,23 +12,24 @@ from datetime import datetime
 email = st.secrets["email"]
 senha = st.secrets["senha"]
 
-# Configuração do navegador
-chrome_options = Options()
-chrome_options.add_experimental_option("detach", True)  # Mantém o navegador aberto
-driver = webdriver.Chrome(options=chrome_options)
-driver.maximize_window()
+# Função para rodar a automação
+def executar_automacao(data_inicio, data_fim):
+    # Configuração do navegador
+    chrome_options = Options()
+    chrome_options.add_experimental_option("detach", True)  # Mantém o navegador aberto
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.maximize_window()
 
-# Abre o site
-driver.get("https://portal.minhaagendaapp.com.br/agenda")
-wait = WebDriverWait(driver, 10)
+    # Abre o site
+    driver.get("https://portal.minhaagendaapp.com.br/agenda")
+    wait = WebDriverWait(driver, 10)
 
-# Preenche login e senha
-wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='email']"))).send_keys(email)
-wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='password']"))).send_keys(senha, Keys.RETURN)
+    # Preenche login e senha
+    wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='email']"))).send_keys(email)
+    wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='password']"))).send_keys(senha, Keys.RETURN)
 
-# Aguarda o carregamento da página após o login
-time.sleep(3)  # Pequeno delay para garantir o carregamento
-
+    # Aguarda o carregamento da página após o login
+    time.sleep(3)  # Pequeno delay para garantir o carregamento
 
     # Aguarda o carregamento da página Agenda
     time.sleep(1)
@@ -106,6 +107,3 @@ if st.button('Gerar Relatório'):
     
     # Chama a função para rodar a automação
     executar_automacao(data_inicio_str, data_fim_str)
-
-
-# para rodar streamlit run automacao_streamlit.py
