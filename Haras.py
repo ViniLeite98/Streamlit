@@ -1,31 +1,31 @@
 import streamlit as st
-from playwright.sync_api import sync_playwright
+import asyncio
+from playwright.async_api import async_playwright
 from datetime import datetime
 import time
 
-# Função que configura e executa a automação com Playwright
-def executar_automacao(data_inicio, data_fim):
-    # Inicia o Playwright
-    with sync_playwright() as p:
+# Função que configura e executa a automação com Playwright (modo assíncrono)
+async def executar_automacao(data_inicio, data_fim):
+    async with async_playwright() as p:
         # Lança o navegador em modo headless
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
 
         # Abre o site
-        page.goto("https://portal.minhaagendaapp.com.br/agenda")
+        await page.goto("https://portal.minhaagendaapp.com.br/agenda")
 
         # Realiza login
-        page.fill("input[type='email']", "viniciusleitesouza_1998@hotmail.com")
-        page.fill("input[type='password']", "Hara@1998")
-        page.press("input[type='password']", "Enter")
+        await page.fill("input[type='email']", "viniciusleitesouza_1998@hotmail.com")
+        await page.fill("input[type='password']", "Hara@1998")
+        await page.press("input[type='password']", "Enter")
 
         # Aguarda o carregamento da página após o login
-        page.wait_for_load_state("networkidle")
+        await page.wait_for_load_state("networkidle")
 
         # Acessa a página "Agenda"
         try:
-            agenda_menu = page.locator("//*[contains(text(), 'Agenda')]")
-            agenda_menu.click()
+            agenda_menu = await page.locator("//*[contains(text(), 'Agenda')]")
+            await agenda_menu.click()
             print("✅ Acessou a página Agenda")
         except Exception:
             print("❌ Erro ao acessar a página Agenda")
@@ -35,19 +35,19 @@ def executar_automacao(data_inicio, data_fim):
 
         # Clica no botão "Exportar"
         try:
-            botao_exportar = page.locator("button.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-sizeSmall.css-h2trc4-btnExport")
-            botao_exportar.scroll_into_view_if_needed()
-            botao_exportar.click()
+            botao_exportar = await page.locator("button.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-sizeSmall.css-h2trc4-btnExport")
+            await botao_exportar.scroll_into_view_if_needed()
+            await botao_exportar.click()
             print("✅ Botão 'Exportar' clicado com sucesso!")
         except Exception as e:
             print(f"❌ Erro ao clicar no botão 'Exportar': {e}")
 
         # Passo 1: Clica no campo "Todos profissionais"
         try:
-            campo_profissionais = page.locator("//*[@id=':rs:']")
-            campo_profissionais.click()
+            campo_profissionais = await page.locator("//*[@id=':rs:']")
+            await campo_profissionais.click()
             time.sleep(1)  # Aguarda o menu abrir
-            page.locator("//*[contains(text(), 'Todos profissionais')]").click()
+            await page.locator("//*[contains(text(), 'Todos profissionais')]").click()
             print("✅ Selecionado 'Todos profissionais'")
         except Exception as e:
             print(f"❌ Erro ao selecionar 'Todos profissionais': {e}")
@@ -55,30 +55,30 @@ def executar_automacao(data_inicio, data_fim):
         # Preenche datas
         try:
             # Clica na data de início
-            data_inicio_elemento = page.locator("//*[@id=':ru:']")
-            data_inicio_elemento.click()
+            data_inicio_elemento = await page.locator("//*[@id=':ru:']")
+            await data_inicio_elemento.click()
             time.sleep(1)  # Aguarda o seletor abrir
-            data_inicio_elemento.fill(data_inicio)  # Preenche com a data de início
-            data_inicio_elemento.press("Enter")  # Pressiona ENTER
+            await data_inicio_elemento.fill(data_inicio)  # Preenche com a data de início
+            await data_inicio_elemento.press("Enter")  # Pressiona ENTER
             print(f"✅ Data de início preenchida: {data_inicio}")
         except Exception as e:
             print(f"❌ Erro ao preencher a data de início: {e}")
 
         # Clica na data de fim
         try:
-            data_fim_elemento = page.locator("//*[@id=':r10:']")
-            data_fim_elemento.click()
+            data_fim_elemento = await page.locator("//*[@id=':r10:']")
+            await data_fim_elemento.click()
             time.sleep(1)  # Aguarda o seletor abrir
-            data_fim_elemento.fill(data_fim)  # Preenche com a data de fim
-            data_fim_elemento.press("Enter")  # Pressiona ENTER
+            await data_fim_elemento.fill(data_fim)  # Preenche com a data de fim
+            await data_fim_elemento.press("Enter")  # Pressiona ENTER
             print(f"✅ Data de fim preenchida: {data_fim}")
         except Exception as e:
             print(f"❌ Erro ao preencher a data de fim: {e}")
 
         # Passo 3: Clicar no botão "Gerar Relatório"
         try:
-            gerar_relatorio_botao = page.locator("/html/body/div[4]/div[3]/div/div[2]/div/button")
-            gerar_relatorio_botao.click()
+            gerar_relatorio_botao = await page.locator("/html/body/div[4]/div[3]/div/div[2]/div/button")
+            await gerar_relatorio_botao.click()
             print("✅ Botão 'Gerar Relatório' clicado com sucesso!")
         except Exception as e:
             print(f"❌ Erro ao clicar no botão 'Gerar Relatório': {e}")
@@ -87,7 +87,7 @@ def executar_automacao(data_inicio, data_fim):
         time.sleep(5)
 
         # Fecha o navegador
-        browser.close()
+        await browser.close()
 
 # Interface do Streamlit
 st.title('Automação de Exportação de Relatório')
@@ -104,4 +104,4 @@ if st.button('Gerar Relatório'):
     st.write(f"Executando automação com as datas selecionadas: {data_inicio_str} a {data_fim_str}")
     
     # Chama a função para rodar a automação
-    executar_automacao(data_inicio_str, data_fim_str)
+    asyncio.run(executar_automacao(data_inicio_str, data_fim_str))
